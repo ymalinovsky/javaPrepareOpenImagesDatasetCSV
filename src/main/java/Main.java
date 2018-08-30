@@ -14,19 +14,32 @@ public class Main {
     private final static String HUMAN_HAND_ID = "/m/0k65p";
     private final static String HUMAN_HAND_LABEL = "Human hand";
     private final static String PATH_TO_IMAGES_FOLDER = "/Users/artem/Downloads/Open_Images_Datase/train/data/";
+    private final static String PATH_TO_CSV_FILES_FOLDER = "/Users/artem/Downloads/Open_Images_Datase/train/";
 
     public static void main(String[] args) throws IOException {
         ArrayList<String> imageListWithHand = getImageListWithHand();
+
         Map<String, Map<String, String>> turicreateData = getTuricreateImagesData(imageListWithHand);
+
         addAnnotationsToTuricreateData(turicreateData);
 
+        saveTuricreateDataToCsvFile(turicreateData);
+
         System.out.println("ATATA!!!");
+    }
+
+    private static String getFilePathToImagesFolder(String filename) {
+        return String.format("%s%s", PATH_TO_IMAGES_FOLDER, filename);
+    }
+
+    private static String getPathToCsvFilesFolder(String filename) {
+        return String.format("%s%s", PATH_TO_CSV_FILES_FOLDER, filename);
     }
 
     private static ArrayList<String> getImageListWithHand() throws IOException {
         ArrayList<String> imageListWithHand = new ArrayList<String>();
 
-        Reader in = new FileReader("/Users/artem/Downloads/Open_Images_Datase/train/imageLabels.csv");
+        Reader in = new FileReader(getPathToCsvFilesFolder("imageLabels.csv"));
         Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
         for (CSVRecord record : records) {
             String imageID = record.get("ImageID");
@@ -46,7 +59,7 @@ public class Main {
     private static Map<String, Map<String, String>> getTuricreateImagesData(ArrayList<String> imageListWithHand) throws IOException {
         Map<String, Map<String, String>> turicreateImagesData = new HashMap<String, Map<String, String>>();
 
-        Reader in = new FileReader("/Users/artem/Downloads/Open_Images_Datase/train/imageIDs.csv");
+        Reader in = new FileReader(getPathToCsvFilesFolder("imageIDs.csv"));
         Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
 
         for (CSVRecord record : records) {
@@ -79,7 +92,7 @@ public class Main {
         InputStream in = new URL(imageStringURL).openStream();
         try {
             String filename = FilenameUtils.getName(imageStringURL);
-            String filePath = getFilePath(filename);
+            String filePath = getFilePathToImagesFolder(filename);
 
             File file = new File(filePath);
             if (!file.exists() && !file.isDirectory()) {
@@ -100,16 +113,12 @@ public class Main {
         }
     }
 
-    private static String getFilePath(String filename) {
-        return String.format("%s%s", PATH_TO_IMAGES_FOLDER, filename);
-    }
-
     private static void addAnnotationsToTuricreateData(Map<String, Map<String, String>> turicreateImagesData) throws IOException {
         for (Map.Entry<String, Map<String, String>> entry : turicreateImagesData.entrySet()) {
             String imageID = entry.getKey();
             Map<String, String> turicreateData = entry.getValue();
 
-            Reader in = new FileReader("/Users/artem/Downloads/Open_Images_Datase/train/boxes.csv");
+            Reader in = new FileReader(getPathToCsvFilesFolder("boxes.csv"));
             Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
             for (CSVRecord record : records) {
                 String labelName = record.get("LabelName");
@@ -121,7 +130,7 @@ public class Main {
                     Double yMax = Double.parseDouble(record.get("YMax"));
 
                     String filename = FilenameUtils.getName(turicreateData.get("path"));
-                    String filePath = getFilePath(filename);
+                    String filePath = getFilePathToImagesFolder(filename);
 
                     BufferedImage bufferedImage = ImageIO.read(new File(filePath));
                     Integer imageWidth = bufferedImage.getWidth();
@@ -158,4 +167,21 @@ public class Main {
             }
         }
     }
+
+    private static void saveTuricreateDataToCsvFile(Map<String, Map<String, String>> turicreateData) throws IOException {
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(getPathToCsvFilesFolder("turicreate.csv")));
+
+        CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT
+                .withHeader("path", "annotations"));
+
+        for (Map.Entry<String, Map<String, String>> entry : turicreateData.entrySet()) {
+            Map<String, String> turicreateImageData = entry.getValue();
+
+            csvPrinter.printRecord(turicreateImageData.get("path"), turicreateImageData.get("annotations"));
+        }
+
+        csvPrinter.flush();
+    }
+
 }
