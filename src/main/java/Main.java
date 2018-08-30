@@ -48,20 +48,20 @@ public class Main {
 
         Reader in = new FileReader("/Users/artem/Downloads/Open_Images_Datase/train/imageIDs.csv");
         Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
+
         for (CSVRecord record : records) {
             String imageID = record.get("ImageID");
-            String originalURL = record.get("OriginalURL");
 
-            for (String openImageWithHandID : imageListWithHand) {
-                if (openImageWithHandID.equals(imageID)) {
-                    String filename = getFilePathAndSaveFileToFolderImages(originalURL);
+            if (imageListWithHand.contains(imageID)) {
+                String originalURL = record.get("OriginalURL");
 
-                    if (filename != null) {
-                        Map<String, String> turicreateImageData = new HashMap<String, String>();
-                        turicreateImageData.put("path", String.format("%s%s", "data/", filename));
+                String filename = getFilePathAndSaveFileToFolderImages(originalURL);
 
-                        turicreateImagesData.put(openImageWithHandID, turicreateImageData);
-                    }
+                if (filename != null) {
+                    Map<String, String> turicreateImageData = new HashMap<String, String>();
+                    turicreateImageData.put("path", String.format("%s%s", "data/", filename));
+
+                    turicreateImagesData.put(imageID, turicreateImageData);
                 }
             }
         }
