@@ -18,7 +18,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
         ArrayList<String> imageListWithHand = getImageListWithHand();
         Map<String, Map<String, String>> turicreateData = getTuricreateImagesData(imageListWithHand);
-//        addAnnotationsToTuricreateData(turicreateData);
+        addAnnotationsToTuricreateData(turicreateData);
 
         System.out.println("ATATA!!!");
     }
@@ -64,6 +64,11 @@ public class Main {
                     turicreateImagesData.put(imageID, turicreateImageData);
                 }
             }
+
+            // tmp test logic
+            if (turicreateImagesData.size() == 1) {
+                break;
+            }
         }
 
 
@@ -74,7 +79,7 @@ public class Main {
         InputStream in = new URL(imageStringURL).openStream();
         try {
             String filename = FilenameUtils.getName(imageStringURL);
-            String filePath = String.format("%s%s", PATH_TO_IMAGES_FOLDER, filename);
+            String filePath = getFilePath(filename);
 
             File file = new File(filePath);
             if (!file.exists() && !file.isDirectory()) {
@@ -95,6 +100,10 @@ public class Main {
         }
     }
 
+    private static String getFilePath(String filename) {
+        return String.format("%s%s", PATH_TO_IMAGES_FOLDER, filename);
+    }
+
     private static void addAnnotationsToTuricreateData(Map<String, Map<String, String>> turicreateImagesData) throws IOException {
         for (Map.Entry<String, Map<String, String>> entry : turicreateImagesData.entrySet()) {
             String imageID = entry.getKey();
@@ -111,7 +120,8 @@ public class Main {
                     Double yMin = Double.parseDouble(record.get("YMin"));
                     Double yMax = Double.parseDouble(record.get("YMax"));
 
-                    String filePath = turicreateData.get("path");
+                    String filename = FilenameUtils.getName(turicreateData.get("path"));
+                    String filePath = getFilePath(filename);
 
                     BufferedImage bufferedImage = ImageIO.read(new File(filePath));
                     Integer imageWidth = bufferedImage.getWidth();
