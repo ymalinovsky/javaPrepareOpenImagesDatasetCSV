@@ -138,8 +138,8 @@ public class Main {
 
                     Integer height = (int) ((yMax - yMin) * imageHeight);
                     Integer width = (int) ((xMax - xMin) * imageWidth);
-                    Integer x = (int) (((xMax - xMin) / 2) * imageWidth);
-                    Integer y = (int) (((yMax - yMin) / 2) * imageHeight);
+                    Integer x = (int) ((((xMax - xMin) / 2) + xMin) * imageWidth);
+                    Integer y = (int) ((((yMax - yMin) / 2) + yMin) * imageHeight);
 
                     JSONObject coordinatesJSON = new JSONObject();
                     coordinatesJSON.put("height", height);
