@@ -147,12 +147,9 @@ public class Main {
                     coordinatesJSON.put("x", x);
                     coordinatesJSON.put("y", y);
 
-                    JSONObject labelJSON = new JSONObject();
-                    labelJSON.put("label", HUMAN_HAND_LABEL);
-
-                    JSONArray annotationJSON = new JSONArray();
-                    annotationJSON.put(coordinatesJSON);
-                    annotationJSON.put(labelJSON);
+                    JSONObject annotationJSON = new JSONObject();
+                    annotationJSON.put("coordinates", coordinatesJSON);
+                    annotationJSON.put("label", HUMAN_HAND_LABEL);
 
                     String annotations = turicreateData.get("annotations");
                     JSONArray annotationsJSON = new JSONArray();
@@ -170,7 +167,7 @@ public class Main {
 
     private static void saveTuricreateDataToCsvFile(Map<String, Map<String, String>> turicreateData) throws IOException {
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter(getPathToCsvFilesFolder("turicreate.csv")));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(getPathToCsvFilesFolder("annotations.csv")));
 
         CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT
                 .withHeader("path", "annotations"));
