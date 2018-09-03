@@ -66,7 +66,9 @@ public class Main {
             String imageID = record.get("ImageID");
 
             if (imageListWithHand.contains(imageID)) {
-                String originalURL = record.get("OriginalURL");
+                // Thumbnail300KURL
+                // OriginalURL
+                String originalURL = record.get("Thumbnail300KURL");
 
                 String filename = getFilePathAndSaveFileToFolderImages(originalURL);
 
@@ -75,11 +77,13 @@ public class Main {
                     turicreateImageData.put("path", String.format("%s%s", "data/", filename));
 
                     turicreateImagesData.put(imageID, turicreateImageData);
+                    
+                    System.out.println(turicreateImagesData.size());
                 }
             }
 
             // tmp test logic
-            if (turicreateImagesData.size() == 1) {
+            if (turicreateImagesData.size() == 1500) {
                 break;
             }
         }
@@ -175,7 +179,12 @@ public class Main {
         for (Map.Entry<String, Map<String, String>> entry : turicreateData.entrySet()) {
             Map<String, String> turicreateImageData = entry.getValue();
 
-            csvPrinter.printRecord(turicreateImageData.get("path"), turicreateImageData.get("annotations"));
+            String path = turicreateImageData.get("path");
+            String annotations = turicreateImageData.get("annotations");
+
+            if (path != null && annotations != null) {
+                csvPrinter.printRecord(path, annotations);
+            }
         }
 
         csvPrinter.flush();
