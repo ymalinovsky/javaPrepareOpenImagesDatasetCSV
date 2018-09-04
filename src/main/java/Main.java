@@ -13,19 +13,60 @@ public class Main {
 
     private final static String HUMAN_HAND_ID = "/m/0k65p";
     private final static String HUMAN_HAND_LABEL = "Human hand";
-    private final static String PATH_TO_IMAGES_FOLDER = "/Users/artem/Downloads/Open_Images_Datase/train/data/";
-    private final static String PATH_TO_CSV_FILES_FOLDER = "/Users/artem/Downloads/Open_Images_Datase/train/";
+    private final static String PATH_TO_IMAGES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/data_origin/";
+    private final static String PATH_TO_RESIZE_IMAGES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/data/";
+    private final static String PATH_TO_CSV_FILES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/Open_Images_Datase/train/";
 
     public static void main(String[] args) throws IOException {
-        ArrayList<String> imageListWithHand = getImageListWithHand();
+//        ArrayList<String> imageListWithHand = getImageListWithHand();
+//        Map<String, Map<String, String>> turicreateData = getTuricreateImagesData(imageListWithHand);
+//        addAnnotationsToTuricreateData(turicreateData);
+//        saveTuricreateDataToCsvFile(turicreateData);
 
-        Map<String, Map<String, String>> turicreateData = getTuricreateImagesData(imageListWithHand);
-
-        addAnnotationsToTuricreateData(turicreateData);
-
-        saveTuricreateDataToCsvFile(turicreateData);
+        resizeImages();
 
         System.out.println("ATATA!!!");
+    }
+
+    private static void resizeImages() throws IOException {
+        ImageResizer imageResizer = new ImageResizer();
+
+        File[] files = new File(PATH_TO_IMAGES_FOLDER).listFiles();
+
+        for (File file : files) {
+            if (file.isFile()) {
+                String inputImagePath = String.format("%s%s", PATH_TO_IMAGES_FOLDER, file.getName());
+                String outputImagePath = String.format("%s%s", PATH_TO_RESIZE_IMAGES_FOLDER, file.getName());
+
+//                Double fileSize = (double) file.length();
+//                Double sizePercentage = 300000 / fileSize;
+//                imageResizer.resizeToPercent(inputImagePath, outputImagePath, sizePercentage);
+
+                File resizeFile = new File(outputImagePath);
+                if (!resizeFile.exists() && !resizeFile.isDirectory()) {
+                    try {
+                        BufferedImage bufferedImage = ImageIO.read(new File(file.getPath()));
+
+                        int imageWidth = bufferedImage.getWidth();
+                        int imageHeight = bufferedImage.getHeight();
+
+                        int scaledWidth;
+                        int scaledHeight;
+                        if (imageWidth < imageHeight) {
+                            scaledWidth = 416;
+                            scaledHeight = (int) (imageHeight * (416.0 / imageWidth));
+                        } else {
+                            scaledHeight = 416;
+                            scaledWidth = (int) (imageWidth * (416.0 / imageHeight));
+                        }
+
+                        imageResizer.resizeToSize(inputImagePath, outputImagePath, scaledWidth, scaledHeight);
+                    } catch (Exception e) {
+                        System.out.println(e.getLocalizedMessage());
+                    }
+                }
+            }
+        }
     }
 
     private static String getFilePathToImagesFolder(String filename) {
