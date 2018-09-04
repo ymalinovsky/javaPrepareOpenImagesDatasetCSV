@@ -13,17 +13,17 @@ public class Main {
 
     private final static String HUMAN_HAND_ID = "/m/0k65p";
     private final static String HUMAN_HAND_LABEL = "Human hand";
-    private final static String PATH_TO_IMAGES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/data_origin/";
+    private final static String PATH_TO_ORIGIN_IMAGES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/data_origin/";
     private final static String PATH_TO_RESIZE_IMAGES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/data/";
     private final static String PATH_TO_CSV_FILES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/Open_Images_Datase/train/";
 
     public static void main(String[] args) throws IOException {
-//        ArrayList<String> imageListWithHand = getImageListWithHand();
-//        Map<String, Map<String, String>> turicreateData = getTuricreateImagesData(imageListWithHand);
-//        addAnnotationsToTuricreateData(turicreateData);
-//        saveTuricreateDataToCsvFile(turicreateData);
+        ArrayList<String> imageListWithHand = getImageListWithHand();
+        Map<String, Map<String, String>> turicreateData = getTuricreateImagesData(imageListWithHand);
+        addAnnotationsToTuricreateData(turicreateData);
+        saveTuricreateDataToCsvFile(turicreateData);
 
-        resizeImages();
+//        resizeImages();
 
         System.out.println("ATATA!!!");
     }
@@ -31,16 +31,12 @@ public class Main {
     private static void resizeImages() throws IOException {
         ImageResizer imageResizer = new ImageResizer();
 
-        File[] files = new File(PATH_TO_IMAGES_FOLDER).listFiles();
+        File[] files = new File(PATH_TO_ORIGIN_IMAGES_FOLDER).listFiles();
 
         for (File file : files) {
             if (file.isFile()) {
-                String inputImagePath = String.format("%s%s", PATH_TO_IMAGES_FOLDER, file.getName());
-                String outputImagePath = String.format("%s%s", PATH_TO_RESIZE_IMAGES_FOLDER, file.getName());
-
-//                Double fileSize = (double) file.length();
-//                Double sizePercentage = 300000 / fileSize;
-//                imageResizer.resizeToPercent(inputImagePath, outputImagePath, sizePercentage);
+                String inputImagePath = getFilePathToImagesFolder(file.getName());
+                String outputImagePath = getFilePathToResizeImagesFolder(file.getName());
 
                 File resizeFile = new File(outputImagePath);
                 if (!resizeFile.exists() && !resizeFile.isDirectory()) {
@@ -70,7 +66,11 @@ public class Main {
     }
 
     private static String getFilePathToImagesFolder(String filename) {
-        return String.format("%s%s", PATH_TO_IMAGES_FOLDER, filename);
+        return String.format("%s%s", PATH_TO_ORIGIN_IMAGES_FOLDER, filename);
+    }
+
+    private static String getFilePathToResizeImagesFolder(String filename) {
+        return String.format("%s%s", PATH_TO_RESIZE_IMAGES_FOLDER, filename);
     }
 
     private static String getPathToCsvFilesFolder(String filename) {
@@ -107,9 +107,7 @@ public class Main {
             String imageID = record.get("ImageID");
 
             if (imageListWithHand.contains(imageID)) {
-                // Thumbnail300KURL
-                // OriginalURL
-                String originalURL = record.get("Thumbnail300KURL");
+                String originalURL = record.get("OriginalURL");
 
                 String filename = getFilePathAndSaveFileToFolderImages(originalURL);
 
@@ -119,7 +117,7 @@ public class Main {
 
                     turicreateImagesData.put(imageID, turicreateImageData);
                     
-                    System.out.println(turicreateImagesData.size());
+                    System.out.println("" + turicreateImagesData.size() + ": " + filename);
                 }
             }
 
@@ -175,7 +173,7 @@ public class Main {
                     Double yMax = Double.parseDouble(record.get("YMax"));
 
                     String filename = FilenameUtils.getName(turicreateData.get("path"));
-                    String filePath = getFilePathToImagesFolder(filename);
+                    String filePath = getFilePathToResizeImagesFolder(filename);
 
                     BufferedImage bufferedImage = ImageIO.read(new File(filePath));
                     Integer imageWidth = bufferedImage.getWidth();
