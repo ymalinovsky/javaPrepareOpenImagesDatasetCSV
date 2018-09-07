@@ -19,8 +19,8 @@ class ImageResizer {
         BufferedImage inputImage = ImageIO.read(inputFile);
 
         // creates output image
-        BufferedImage outputImage = new BufferedImage(scaledWidth,
-                scaledHeight, inputImage.getType());
+//        BufferedImage outputImage = new BufferedImage(scaledWidth, scaledHeight, inputImage.getType());
+        BufferedImage outputImage = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_RGB);
 
         // scales the input image to the output image
         Graphics2D g2d = outputImage.createGraphics();
@@ -28,8 +28,7 @@ class ImageResizer {
         g2d.dispose();
 
         // extracts extension of output file
-        String formatName = outputImagePath.substring(outputImagePath
-                .lastIndexOf(".") + 1);
+        String formatName = outputImagePath.substring(outputImagePath.lastIndexOf(".") + 1);
 
         // writes to output file
         ImageIO.write(outputImage, formatName, new File(outputImagePath));

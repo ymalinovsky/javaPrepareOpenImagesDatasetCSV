@@ -18,7 +18,7 @@ public class Main {
     private final static String PATH_TO_CSV_FILES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/Open_Images_Datase/train/";
 
     public static void main(String[] args) throws IOException {
-        ArrayList<String> imageListWithHand = getImageListWithHand();
+        List<String> imageListWithHand = getImageListWithHand();
         Map<String, Map<String, String>> turicreateData = getTuricreateImagesData(imageListWithHand);
         addAnnotationsToTuricreateData(turicreateData);
         saveTuricreateDataToCsvFile(turicreateData);
@@ -77,8 +77,8 @@ public class Main {
         return String.format("%s%s", PATH_TO_CSV_FILES_FOLDER, filename);
     }
 
-    private static ArrayList<String> getImageListWithHand() throws IOException {
-        ArrayList<String> imageListWithHand = new ArrayList<String>();
+    private static List<String> getImageListWithHand() throws IOException {
+        List<String> imageListWithHand = new ArrayList<String>();
 
         Reader in = new FileReader(getPathToCsvFilesFolder("imageLabels.csv"));
         Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
@@ -97,7 +97,7 @@ public class Main {
         return imageListWithHand;
     }
 
-    private static Map<String, Map<String, String>> getTuricreateImagesData(ArrayList<String> imageListWithHand) throws IOException {
+    private static Map<String, Map<String, String>> getTuricreateImagesData(List<String> imageListWithHand) throws IOException {
         Map<String, Map<String, String>> turicreateImagesData = new HashMap<String, Map<String, String>>();
 
         Reader in = new FileReader(getPathToCsvFilesFolder("imageIDs.csv"));
@@ -122,9 +122,9 @@ public class Main {
             }
 
             // tmp test logic
-            if (turicreateImagesData.size() == 1500) {
-                break;
-            }
+//            if (turicreateImagesData.size() == 3500) {
+//                break;
+//            }
         }
 
 
@@ -157,20 +157,20 @@ public class Main {
     }
 
     private static void addAnnotationsToTuricreateData(Map<String, Map<String, String>> turicreateImagesData) throws IOException {
+        Map<String, List<Map<String, String>>> boxesImageData = getBoxesImageData();
+
         for (Map.Entry<String, Map<String, String>> entry : turicreateImagesData.entrySet()) {
             String imageID = entry.getKey();
-            Map<String, String> turicreateData = entry.getValue();
 
-            Reader in = new FileReader(getPathToCsvFilesFolder("boxes.csv"));
-            Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
-            for (CSVRecord record : records) {
-                String labelName = record.get("LabelName");
+            List<Map<String, String>> boxesData = boxesImageData.get(imageID);
+            if (boxesData != null) {
+                for (Map<String, String> boxData : boxesData) {
+                    Map<String, String> turicreateData = entry.getValue();
 
-                if (imageID.equals(record.get("ImageID")) && labelName.equals(HUMAN_HAND_ID)) {
-                    Double xMin = Double.parseDouble(record.get("XMin"));
-                    Double xMax = Double.parseDouble(record.get("XMax"));
-                    Double yMin = Double.parseDouble(record.get("YMin"));
-                    Double yMax = Double.parseDouble(record.get("YMax"));
+                    Double xMin = Double.parseDouble(boxData.get("XMin"));
+                    Double xMax = Double.parseDouble(boxData.get("XMax"));
+                    Double yMin = Double.parseDouble(boxData.get("YMin"));
+                    Double yMax = Double.parseDouble(boxData.get("YMax"));
 
                     String filename = FilenameUtils.getName(turicreateData.get("path"));
                     String filePath = getFilePathToResizeImagesFolder(filename);
@@ -206,6 +206,38 @@ public class Main {
                 }
             }
         }
+    }
+
+    private static Map<String, List<Map<String, String>>> getBoxesImageData() throws IOException {
+        Map<String, List<Map<String, String>>> boxesImageData = new HashMap<String, List<Map<String, String>>>();
+
+        Reader in = new FileReader(getPathToCsvFilesFolder("boxes.csv"));
+        Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
+        for (CSVRecord record : records) {
+            String labelName = record.get("LabelName");
+            String isOccluded = record.get("IsOccluded");
+
+            if (labelName.equals(HUMAN_HAND_ID) && isOccluded.equals("0")) {
+                String imageID = record.get("ImageID");
+
+                List<Map<String, String>> boxesData = boxesImageData.get(imageID);
+                if (boxesData == null) {
+                    boxesData = new ArrayList<Map<String, String>>();
+                }
+
+                Map<String, String> boxImageData = new HashMap<String, String>();
+                boxImageData.put("XMin", record.get("XMin"));
+                boxImageData.put("XMax", record.get("XMax"));
+                boxImageData.put("YMin", record.get("YMin"));
+                boxImageData.put("YMax", record.get("YMax"));
+
+                boxesData.add(boxImageData);
+
+                boxesImageData.put(imageID, boxesData);
+            }
+        }
+
+        return boxesImageData;
     }
 
     private static void saveTuricreateDataToCsvFile(Map<String, Map<String, String>> turicreateData) throws IOException {
