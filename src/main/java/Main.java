@@ -17,21 +17,25 @@ public class Main {
     private final String PATH_TO_RESIZE_IMAGES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/data/";
     private final String PATH_TO_CSV_FILES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/Open_Images_Datase/train/";
 
-    public void main(String[] args) throws IOException {
-        List<String> imageListWithHand = this.getImageListWithHand();
+    public static void main(String[] args) throws IOException {
+        Main main = new Main();
+        List<String> imageListWithHand = main.getImageListWithHand();
 
-//        getTuricreateCSV(imageListWithHand);
-        getTensorflowCSV(imageListWithHand);
+//        main.getTuricreateCSV(imageListWithHand);
+        main.getTensorflowCSV(imageListWithHand);
 
-//        resizeImages();
+//        main.resizeImages();
+
+    }
+
+    private void getTensorflowCSV(List<String> imageListWithHand) throws IOException {
+        TensorflowCSV tensorflowCSV = new TensorflowCSV(this);
+
+        List<Map<String, String>> tensorflowImagesData = tensorflowCSV.getTensorflowImagesData(imageListWithHand);
+        List<Map<String, String>> tensorflowData = tensorflowCSV.getTensorflowData(tensorflowImagesData);
 
         System.out.println("ATATA!!!");
     }
-
-    private static void getTensorflowCSV(List<String> imageListWithHand) throws IOException {
-
-    }
-
 
     private void getTuricreateCSV(List<String> imageListWithHand) throws IOException {
         TuricreateCSV turicreateCSV = new TuricreateCSV(this);
@@ -59,6 +63,63 @@ public class Main {
         }
 
         return imageListWithHand;
+    }
+
+    String getFilePathAndSaveFileToFolderImages(String imageStringURL) throws IOException {
+        InputStream in = new URL(imageStringURL).openStream();
+        try {
+            String filename = FilenameUtils.getName(imageStringURL);
+            String filePath = getFilePathToImagesFolder(filename);
+
+            File file = new File(filePath);
+            if (!file.exists() && !file.isDirectory()) {
+                byte[] fileByte = IOUtils.toByteArray(in);
+
+                if (fileByte.length < 5000) {
+                    return null;
+                } else {
+                    FileOutputStream out = new FileOutputStream(filePath);
+                    out.write(fileByte);
+                    out.close();
+                }
+            }
+
+            return filename;
+        } finally {
+            in.close();
+        }
+    }
+
+    Map<String, List<Map<String, String>>> getBoxesImageData() throws IOException {
+        Map<String, List<Map<String, String>>> boxesImageData = new HashMap<String, List<Map<String, String>>>();
+
+        Reader in = new FileReader(getPathToCsvFilesFolder("boxes.csv"));
+        Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
+        for (CSVRecord record : records) {
+            String labelName = record.get("LabelName");
+            String isOccluded = record.get("IsOccluded");
+
+            if (labelName.equals(HUMAN_HAND_ID) && isOccluded.equals("0")) {
+                String imageID = record.get("ImageID");
+
+                List<Map<String, String>> boxesData = boxesImageData.get(imageID);
+                if (boxesData == null) {
+                    boxesData = new ArrayList<Map<String, String>>();
+                }
+
+                Map<String, String> boxImageData = new HashMap<String, String>();
+                boxImageData.put("XMin", record.get("XMin"));
+                boxImageData.put("XMax", record.get("XMax"));
+                boxImageData.put("YMin", record.get("YMin"));
+                boxImageData.put("YMax", record.get("YMax"));
+
+                boxesData.add(boxImageData);
+
+                boxesImageData.put(imageID, boxesData);
+            }
+        }
+
+        return boxesImageData;
     }
 
     private void resizeImages() {
