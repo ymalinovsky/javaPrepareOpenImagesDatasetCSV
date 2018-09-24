@@ -105,10 +105,9 @@ class TuricreateCSV {
 
     void saveTuricreateDataToCsvFile(Map<String, Map<String, String>> turicreateData) throws IOException {
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter(main.getPathToCsvFilesFolder("annotations.csv")));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(main.getPathToCsvFilesFolder("turicreate_annotations.csv")));
 
-        CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT
-                .withHeader("path", "annotations"));
+        CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("path", "annotations"));
 
         for (Map.Entry<String, Map<String, String>> entry : turicreateData.entrySet()) {
             Map<String, String> turicreateImageData = entry.getValue();

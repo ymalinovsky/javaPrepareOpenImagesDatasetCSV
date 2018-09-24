@@ -33,8 +33,9 @@ public class Main {
 
         List<Map<String, String>> tensorflowImagesData = tensorflowCSV.getTensorflowImagesData(imageListWithHand);
         List<Map<String, String>> tensorflowData = tensorflowCSV.getTensorflowData(tensorflowImagesData);
+        tensorflowCSV.saveTensorflowDataToCsvFile(tensorflowData);
 
-        System.out.println("ATATA!!!");
+        System.out.println("DONE!");
     }
 
     private void getTuricreateCSV(List<String> imageListWithHand) throws IOException {
@@ -42,7 +43,9 @@ public class Main {
 
         Map<String, Map<String, String>> turicreateData = turicreateCSV.getTuricreateImagesData(imageListWithHand);
         turicreateCSV.addAnnotationsToTuricreateData(turicreateData);
-        turicreateCSV. saveTuricreateDataToCsvFile(turicreateData);
+        turicreateCSV.saveTuricreateDataToCsvFile(turicreateData);
+
+        System.out.println("DONE!");
     }
 
     private List<String> getImageListWithHand() throws IOException {
