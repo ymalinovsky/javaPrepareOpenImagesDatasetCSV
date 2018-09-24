@@ -11,32 +11,65 @@ import org.json.*;
 
 public class Main {
 
-    private final static String HUMAN_HAND_ID = "/m/0k65p";
-    private final static String HUMAN_HAND_LABEL = "Human hand";
-    private final static String PATH_TO_ORIGIN_IMAGES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/data_origin/";
-    private final static String PATH_TO_RESIZE_IMAGES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/data/";
-    private final static String PATH_TO_CSV_FILES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/Open_Images_Datase/train/";
+    final String HUMAN_HAND_ID = "/m/0k65p";
+    final String HUMAN_HAND_LABEL = "Human hand";
+    private final String PATH_TO_ORIGIN_IMAGES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/data_origin/";
+    private final String PATH_TO_RESIZE_IMAGES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/data/";
+    private final String PATH_TO_CSV_FILES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/Open_Images_Datase/train/";
 
-    public static void main(String[] args) throws IOException {
-        List<String> imageListWithHand = getImageListWithHand();
-        Map<String, Map<String, String>> turicreateData = getTuricreateImagesData(imageListWithHand);
-        addAnnotationsToTuricreateData(turicreateData);
-        saveTuricreateDataToCsvFile(turicreateData);
+    public void main(String[] args) throws IOException {
+        List<String> imageListWithHand = this.getImageListWithHand();
+
+//        getTuricreateCSV(imageListWithHand);
+        getTensorflowCSV(imageListWithHand);
 
 //        resizeImages();
 
         System.out.println("ATATA!!!");
     }
 
-    private static void resizeImages() throws IOException {
+    private static void getTensorflowCSV(List<String> imageListWithHand) throws IOException {
+
+    }
+
+
+    private void getTuricreateCSV(List<String> imageListWithHand) throws IOException {
+        TuricreateCSV turicreateCSV = new TuricreateCSV(this);
+
+        Map<String, Map<String, String>> turicreateData = turicreateCSV.getTuricreateImagesData(imageListWithHand);
+        turicreateCSV.addAnnotationsToTuricreateData(turicreateData);
+        turicreateCSV. saveTuricreateDataToCsvFile(turicreateData);
+    }
+
+    private List<String> getImageListWithHand() throws IOException {
+        List<String> imageListWithHand = new ArrayList<String>();
+
+        Reader in = new FileReader(this.getPathToCsvFilesFolder("imageLabels.csv"));
+        Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
+        for (CSVRecord record : records) {
+            String imageID = record.get("ImageID");
+            String source = record.get("Source");
+            String labelName = record.get("LabelName");
+            String confidence = record.get("Confidence");
+
+            if (source.equals("verification") && confidence.equals("1") && labelName.equals(HUMAN_HAND_ID)) {
+                imageListWithHand.add(imageID);
+            }
+
+        }
+
+        return imageListWithHand;
+    }
+
+    private void resizeImages() {
         ImageResizer imageResizer = new ImageResizer();
 
         File[] files = new File(PATH_TO_ORIGIN_IMAGES_FOLDER).listFiles();
 
         for (File file : files) {
             if (file.isFile()) {
-                String inputImagePath = getFilePathToImagesFolder(file.getName());
-                String outputImagePath = getFilePathToResizeImagesFolder(file.getName());
+                String inputImagePath = this.getFilePathToImagesFolder(file.getName());
+                String outputImagePath = this.getFilePathToResizeImagesFolder(file.getName());
 
                 File resizeFile = new File(outputImagePath);
                 if (!resizeFile.exists() && !resizeFile.isDirectory()) {
@@ -65,200 +98,16 @@ public class Main {
         }
     }
 
-    private static String getFilePathToImagesFolder(String filename) {
+    String getFilePathToImagesFolder(String filename) {
         return String.format("%s%s", PATH_TO_ORIGIN_IMAGES_FOLDER, filename);
     }
 
-    private static String getFilePathToResizeImagesFolder(String filename) {
+    String getFilePathToResizeImagesFolder(String filename) {
         return String.format("%s%s", PATH_TO_RESIZE_IMAGES_FOLDER, filename);
     }
 
-    private static String getPathToCsvFilesFolder(String filename) {
+    String getPathToCsvFilesFolder(String filename) {
         return String.format("%s%s", PATH_TO_CSV_FILES_FOLDER, filename);
-    }
-
-    private static List<String> getImageListWithHand() throws IOException {
-        List<String> imageListWithHand = new ArrayList<String>();
-
-        Reader in = new FileReader(getPathToCsvFilesFolder("imageLabels.csv"));
-        Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
-        for (CSVRecord record : records) {
-            String imageID = record.get("ImageID");
-            String source = record.get("Source");
-            String labelName = record.get("LabelName");
-            String confidence = record.get("Confidence");
-
-            if (source.equals("verification") && confidence.equals("1") && labelName.equals(HUMAN_HAND_ID)) {
-                imageListWithHand.add(imageID);
-            }
-
-        }
-
-        return imageListWithHand;
-    }
-
-    private static Map<String, Map<String, String>> getTuricreateImagesData(List<String> imageListWithHand) throws IOException {
-        Map<String, Map<String, String>> turicreateImagesData = new HashMap<String, Map<String, String>>();
-
-        Reader in = new FileReader(getPathToCsvFilesFolder("imageIDs.csv"));
-        Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
-
-        for (CSVRecord record : records) {
-            String imageID = record.get("ImageID");
-
-            if (imageListWithHand.contains(imageID)) {
-                String originalURL = record.get("OriginalURL");
-
-                String filename = getFilePathAndSaveFileToFolderImages(originalURL);
-
-                if (filename != null) {
-                    Map<String, String> turicreateImageData = new HashMap<String, String>();
-                    turicreateImageData.put("path", String.format("%s%s", "data/", filename));
-
-                    turicreateImagesData.put(imageID, turicreateImageData);
-                    
-                    System.out.println("" + turicreateImagesData.size() + ": " + filename);
-                }
-            }
-
-            // tmp test logic
-//            if (turicreateImagesData.size() == 3500) {
-//                break;
-//            }
-        }
-
-
-        return turicreateImagesData;
-    }
-
-    private static String getFilePathAndSaveFileToFolderImages(String imageStringURL) throws IOException {
-        InputStream in = new URL(imageStringURL).openStream();
-        try {
-            String filename = FilenameUtils.getName(imageStringURL);
-            String filePath = getFilePathToImagesFolder(filename);
-
-            File file = new File(filePath);
-            if (!file.exists() && !file.isDirectory()) {
-                byte[] fileByte = IOUtils.toByteArray(in);
-
-                if (fileByte.length < 5000) {
-                    return null;
-                } else {
-                    FileOutputStream out = new FileOutputStream(filePath);
-                    out.write(fileByte);
-                    out.close();
-                }
-            }
-
-            return filename;
-        } finally {
-            in.close();
-        }
-    }
-
-    private static void addAnnotationsToTuricreateData(Map<String, Map<String, String>> turicreateImagesData) throws IOException {
-        Map<String, List<Map<String, String>>> boxesImageData = getBoxesImageData();
-
-        for (Map.Entry<String, Map<String, String>> entry : turicreateImagesData.entrySet()) {
-            String imageID = entry.getKey();
-
-            List<Map<String, String>> boxesData = boxesImageData.get(imageID);
-            if (boxesData != null) {
-                for (Map<String, String> boxData : boxesData) {
-                    Map<String, String> turicreateData = entry.getValue();
-
-                    Double xMin = Double.parseDouble(boxData.get("XMin"));
-                    Double xMax = Double.parseDouble(boxData.get("XMax"));
-                    Double yMin = Double.parseDouble(boxData.get("YMin"));
-                    Double yMax = Double.parseDouble(boxData.get("YMax"));
-
-                    String filename = FilenameUtils.getName(turicreateData.get("path"));
-                    String filePath = getFilePathToResizeImagesFolder(filename);
-
-                    BufferedImage bufferedImage = ImageIO.read(new File(filePath));
-                    Integer imageWidth = bufferedImage.getWidth();
-                    Integer imageHeight = bufferedImage.getHeight();
-
-                    Integer height = (int) ((yMax - yMin) * imageHeight);
-                    Integer width = (int) ((xMax - xMin) * imageWidth);
-                    Integer x = (int) ((((xMax - xMin) / 2) + xMin) * imageWidth);
-                    Integer y = (int) ((((yMax - yMin) / 2) + yMin) * imageHeight);
-
-                    JSONObject coordinatesJSON = new JSONObject();
-                    coordinatesJSON.put("height", height);
-                    coordinatesJSON.put("width", width);
-                    coordinatesJSON.put("x", x);
-                    coordinatesJSON.put("y", y);
-
-                    JSONObject annotationJSON = new JSONObject();
-                    annotationJSON.put("coordinates", coordinatesJSON);
-                    annotationJSON.put("label", HUMAN_HAND_LABEL);
-
-                    String annotations = turicreateData.get("annotations");
-                    JSONArray annotationsJSON = new JSONArray();
-                    if (annotations != null) {
-                        annotationsJSON = new JSONArray(annotations);
-                    }
-
-                    annotationsJSON.put(annotationJSON);
-
-                    turicreateData.put("annotations", annotationsJSON.toString());
-                }
-            }
-        }
-    }
-
-    private static Map<String, List<Map<String, String>>> getBoxesImageData() throws IOException {
-        Map<String, List<Map<String, String>>> boxesImageData = new HashMap<String, List<Map<String, String>>>();
-
-        Reader in = new FileReader(getPathToCsvFilesFolder("boxes.csv"));
-        Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
-        for (CSVRecord record : records) {
-            String labelName = record.get("LabelName");
-            String isOccluded = record.get("IsOccluded");
-
-            if (labelName.equals(HUMAN_HAND_ID) && isOccluded.equals("0")) {
-                String imageID = record.get("ImageID");
-
-                List<Map<String, String>> boxesData = boxesImageData.get(imageID);
-                if (boxesData == null) {
-                    boxesData = new ArrayList<Map<String, String>>();
-                }
-
-                Map<String, String> boxImageData = new HashMap<String, String>();
-                boxImageData.put("XMin", record.get("XMin"));
-                boxImageData.put("XMax", record.get("XMax"));
-                boxImageData.put("YMin", record.get("YMin"));
-                boxImageData.put("YMax", record.get("YMax"));
-
-                boxesData.add(boxImageData);
-
-                boxesImageData.put(imageID, boxesData);
-            }
-        }
-
-        return boxesImageData;
-    }
-
-    private static void saveTuricreateDataToCsvFile(Map<String, Map<String, String>> turicreateData) throws IOException {
-
-        BufferedWriter writer = new BufferedWriter(new FileWriter(getPathToCsvFilesFolder("annotations.csv")));
-
-        CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT
-                .withHeader("path", "annotations"));
-
-        for (Map.Entry<String, Map<String, String>> entry : turicreateData.entrySet()) {
-            Map<String, String> turicreateImageData = entry.getValue();
-
-            String path = turicreateImageData.get("path");
-            String annotations = turicreateImageData.get("annotations");
-
-            if (path != null && annotations != null) {
-                csvPrinter.printRecord(path, annotations);
-            }
-        }
-
-        csvPrinter.flush();
     }
 
 }

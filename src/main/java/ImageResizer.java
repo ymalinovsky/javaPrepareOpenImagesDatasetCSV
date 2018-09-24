@@ -1,25 +1,19 @@
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.awt.AlphaComposite;
-import java.awt.RenderingHints;
 
 import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-
 class ImageResizer {
 
-     void resizeToSize(String inputImagePath,
-                              String outputImagePath, int scaledWidth, int scaledHeight)
-            throws IOException {
+     void resizeToSize(String inputImagePath, String outputImagePath, int scaledWidth, int scaledHeight) throws IOException {
         // reads input image
         File inputFile = new File(inputImagePath);
         BufferedImage inputImage = ImageIO.read(inputFile);
 
         // creates output image
-//        BufferedImage outputImage = new BufferedImage(scaledWidth, scaledHeight, inputImage.getType());
         BufferedImage outputImage = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_RGB);
 
         // scales the input image to the output image
@@ -34,8 +28,7 @@ class ImageResizer {
         ImageIO.write(outputImage, formatName, new File(outputImagePath));
     }
 
-    void resizeToPercent(String inputImagePath,
-                              String outputImagePath, double percent) throws IOException {
+    void resizeToPercent(String inputImagePath, String outputImagePath, double percent) throws IOException {
         File inputFile = new File(inputImagePath);
         BufferedImage inputImage = ImageIO.read(inputFile);
         int scaledWidth = (int) (inputImage.getWidth() * percent);
