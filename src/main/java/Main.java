@@ -12,7 +12,7 @@ import org.json.*;
 public class Main {
 
     final String HUMAN_HAND_ID = "/m/0k65p";
-    final String HUMAN_HAND_LABEL = "Human hand";
+    final String HUMAN_HAND_LABEL = "hand";
     private final String PATH_TO_ORIGIN_IMAGES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/data_origin/";
     private final String PATH_TO_RESIZE_IMAGES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/data/";
     private final String PATH_TO_CSV_FILES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/Open_Images_Datase/train/";
