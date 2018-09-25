@@ -43,9 +43,9 @@ class TensorflowCSV {
             }
 
             // tmp test logic
-            if (tensorflowImagesData.size() == 1) {
-                break;
-            }
+//            if (tensorflowImagesData.size() == 1000) {
+//                break;
+//            }
         }
 
 

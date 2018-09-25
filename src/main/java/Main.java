@@ -69,22 +69,24 @@ public class Main {
     }
 
     String getFilePathAndSaveFileToFolderImages(String imageStringURL) throws IOException {
+        String filename = FilenameUtils.getName(imageStringURL);
+        String filePath = getFilePathToImagesFolder(filename);
+
+        File file = new File(filePath);
+        if (file.exists() && !file.isDirectory()) {
+            return filename;
+        }
+
         InputStream in = new URL(imageStringURL).openStream();
         try {
-            String filename = FilenameUtils.getName(imageStringURL);
-            String filePath = getFilePathToImagesFolder(filename);
+            byte[] fileByte = IOUtils.toByteArray(in);
 
-            File file = new File(filePath);
-            if (!file.exists() && !file.isDirectory()) {
-                byte[] fileByte = IOUtils.toByteArray(in);
-
-                if (fileByte.length < 5000) {
-                    return null;
-                } else {
-                    FileOutputStream out = new FileOutputStream(filePath);
-                    out.write(fileByte);
-                    out.close();
-                }
+            if (fileByte.length < 5000) {
+                return null;
+            } else {
+                FileOutputStream out = new FileOutputStream(filePath);
+                out.write(fileByte);
+                out.close();
             }
 
             return filename;
