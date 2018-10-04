@@ -22,17 +22,27 @@ public class Main {
         List<String> imageListWithHand = main.getImageListWithHand();
 
 //        main.getTuricreateCSV(imageListWithHand);
-        main.getTensorflowCSV(imageListWithHand);
+//        main.getTensorflowCSV(imageListWithHand);
+        main.getLabelImgXMLs(imageListWithHand);
 
 //        main.resizeImages();
 
     }
 
+    private void getLabelImgXMLs(List<String> imageListWithHand) throws IOException {
+        LabelImgXMLs labelImgXMLs = new LabelImgXMLs(this);
+
+        List<Map<String, String>> labelImgXMLsData = getExistingHandImages(imageListWithHand);
+        List<Map<String, String>> labelXMLsData = getExistingHandImagesData(labelImgXMLsData);
+
+        labelImgXMLs.prepareLabelImgXMLs("ATATA.png");
+    }
+
     private void getTensorflowCSV(List<String> imageListWithHand) throws IOException {
         TensorflowCSV tensorflowCSV = new TensorflowCSV(this);
 
-        List<Map<String, String>> tensorflowImagesData = tensorflowCSV.getTensorflowImagesData(imageListWithHand);
-        List<Map<String, String>> tensorflowData = tensorflowCSV.getTensorflowData(tensorflowImagesData);
+        List<Map<String, String>> tensorflowImagesData = getExistingHandImages(imageListWithHand);
+        List<Map<String, String>> tensorflowData = getExistingHandImagesData(tensorflowImagesData);
         tensorflowCSV.saveTensorflowDataToCsvFile(tensorflowData);
 
         System.out.println("DONE!");
@@ -66,6 +76,88 @@ public class Main {
         }
 
         return imageListWithHand;
+    }
+
+    List<Map<String, String>> getExistingHandImages(List<String> imageListWithHand) throws IOException {
+        List<Map<String, String>> imagesData = new ArrayList<Map<String, String>>();
+
+        Reader in = new FileReader(getPathToCsvFilesFolder("imageIDs.csv"));
+        Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
+
+        for (CSVRecord record : records) {
+            String imageID = record.get("ImageID");
+
+            if (imageListWithHand.contains(imageID)) {
+                String originalURL = record.get("OriginalURL");
+
+                String filename = getFilePathAndSaveFileToFolderImages(originalURL);
+
+                if (filename != null) {
+                    Map<String, String> imageData = new HashMap<String, String>();
+                    imageData.put("filename", String.format("%s", filename));
+                    imageData.put("ImageID", imageID);
+
+                    imagesData.add(imageData);
+
+                    System.out.println("" + imagesData.size() + ": " + filename);
+                }
+            }
+
+            // tmp test logic
+//            if (imagesData.size() == 1000) {
+//                break;
+//            }
+        }
+
+
+        return imagesData;
+    }
+
+    List<Map<String, String>> getExistingHandImagesData(List<Map<String, String>> imagesData) throws IOException {
+        List<Map<String, String>> existingHandImagesData = new ArrayList<Map<String, String>>();
+
+        Map<String, List<Map<String, String>>> boxesImageData = getBoxesImageData();
+
+        for (Map<String, String> imageData : imagesData) {
+            String imageID = imageData.get("ImageID");
+
+            List<Map<String, String>> boxesData = boxesImageData.get(imageID);
+            if (boxesData != null) {
+                for (Map<String, String> boxData : boxesData) {
+
+                    Double xMin = Double.parseDouble(boxData.get("XMin"));
+                    Double xMax = Double.parseDouble(boxData.get("XMax"));
+                    Double yMin = Double.parseDouble(boxData.get("YMin"));
+                    Double yMax = Double.parseDouble(boxData.get("YMax"));
+
+                    String filename = imageData.get("filename");
+                    String filePath = getFilePathToResizeImagesFolder(filename);
+
+                    BufferedImage bufferedImage = ImageIO.read(new File(filePath));
+                    Integer imageWidth = bufferedImage.getWidth();
+                    Integer imageHeight = bufferedImage.getHeight();
+
+                    Integer xmin = (int)(xMin * imageWidth);
+                    Integer xmax = (int)(xMax * imageWidth);
+                    Integer ymin = (int)(yMin * imageHeight);
+                    Integer ymax = (int)(yMax * imageHeight);
+
+                    Map<String, String> existingImageData = new HashMap<String, String>();
+                    existingImageData.put("filename", filename);
+                    existingImageData.put("width", imageWidth.toString());
+                    existingImageData.put("height", imageHeight.toString());
+                    existingImageData.put("class", HUMAN_HAND_LABEL);
+                    existingImageData.put("xmin", xmin.toString());
+                    existingImageData.put("xmax", xmax.toString());
+                    existingImageData.put("ymin", ymin.toString());
+                    existingImageData.put("ymax", ymax.toString());
+
+                    existingHandImagesData.add(existingImageData);
+                }
+            }
+        }
+
+        return existingHandImagesData;
     }
 
     String getFilePathAndSaveFileToFolderImages(String imageStringURL) throws IOException {
