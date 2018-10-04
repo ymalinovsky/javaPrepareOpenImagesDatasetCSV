@@ -41,7 +41,7 @@ public class LabelImgXMLs {
                 if (!file.exists() && !file.isDirectory()) {
                     createXMLFile(filename, width, height, classDescription, xmin, xmax, ymin, ymax, annotationsFilePath);
                 } else {
-                    modifyXMLFile(filename, width, height, classDescription, xmin, xmax, ymin, ymax, annotationsFilePath);
+                    modifyXMLFile(classDescription, xmin, xmax, ymin, ymax, annotationsFilePath);
                 }
             }
         }
@@ -123,11 +123,10 @@ public class LabelImgXMLs {
             objectElement.appendChild(bndboxElement);
             rootElement.appendChild(objectElement);
 
-            // write the content into xml file
+            // write content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(doc);
-            System.out.println("-----------File Created------------");
             StreamResult result = new StreamResult(new File(annotationsFilePath));
             transformer.transform(source, result);
 
@@ -136,7 +135,7 @@ public class LabelImgXMLs {
         }
     }
 
-    void modifyXMLFile(String filename, String width, String height, String classDescription, String xmin, String xmax, String ymin, String ymax, String annotationsFilePath) {
+    void modifyXMLFile(String classDescription, String xmin, String xmax, String ymin, String ymax, String annotationsFilePath) {
         try {
             File inputFile = new File(annotationsFilePath);
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -174,13 +173,12 @@ public class LabelImgXMLs {
             objectElement.appendChild(bndboxElement);
             rootElement.appendChild(objectElement);
 
-            // write the content on console
+            // write content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(doc);
-            System.out.println("-----------Modified File-----------");
-            StreamResult consoleResult = new StreamResult(System.out);
-            transformer.transform(source, consoleResult);
+            StreamResult result = new StreamResult(new File(annotationsFilePath));
+            transformer.transform(source, result);
 
         } catch (Exception e) {
             e.printStackTrace();
