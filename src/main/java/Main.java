@@ -15,7 +15,7 @@ public class Main {
     final String HUMAN_HAND_LABEL = "hand";
     private final String PATH_TO_ORIGIN_IMAGES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/data_origin/";
     private final String PATH_TO_RESIZE_IMAGES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/data/";
-    private final String PATH_TO_CSV_FILES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/Open_Images_Datase/train/";
+    final String PATH_TO_CSV_FILES_FOLDER = "/Volumes/Macintosh HD/Users/ymalinovsky/Documents/Finger/test6/Open_Images_Datase/train/";
 
     public static void main(String[] args) throws IOException {
         Main main = new Main();
@@ -35,7 +35,7 @@ public class Main {
         List<Map<String, String>> labelImgXMLsData = getExistingHandImages(imageListWithHand);
         List<Map<String, String>> labelXMLsData = getExistingHandImagesData(labelImgXMLsData);
 
-        labelImgXMLs.prepareLabelImgXMLs("ATATA.png");
+        labelImgXMLs.prepareLabelImgXMLs(labelXMLsData);
     }
 
     private void getTensorflowCSV(List<String> imageListWithHand) throws IOException {
@@ -104,9 +104,9 @@ public class Main {
             }
 
             // tmp test logic
-//            if (imagesData.size() == 1000) {
-//                break;
-//            }
+            if (imagesData.size() == 1) {
+                break;
+            }
         }
 
 
