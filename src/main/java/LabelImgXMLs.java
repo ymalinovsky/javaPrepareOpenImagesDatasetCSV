@@ -8,6 +8,8 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -19,13 +21,6 @@ public class LabelImgXMLs {
     LabelImgXMLs(Main main) {
         this.main = main;
     }
-
-//<cars>
-//   <supercars company = "Ferrari">
-//      <carname type = "formula one">Ferrari 101</carname>
-//      <carname type = "sports">Ferrari 202</carname>
-//   </supercars>
-//</cars>
 
     void prepareLabelImgXMLs(List<Map<String, String>> labelXMLsData) {
 
@@ -46,7 +41,7 @@ public class LabelImgXMLs {
                 if (!file.exists() && !file.isDirectory()) {
                     createXMLFile(filename, width, height, classDescription, xmin, xmax, ymin, ymax, annotationsFilePath);
                 } else {
-                    System.out.println("ATATA!!!");
+                    modifyXMLFile(filename, width, height, classDescription, xmin, xmax, ymin, ymax, annotationsFilePath);
                 }
             }
         }
@@ -132,6 +127,7 @@ public class LabelImgXMLs {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(doc);
+            System.out.println("-----------File Created------------");
             StreamResult result = new StreamResult(new File(annotationsFilePath));
             transformer.transform(source, result);
 
@@ -140,4 +136,54 @@ public class LabelImgXMLs {
         }
     }
 
+    void modifyXMLFile(String filename, String width, String height, String classDescription, String xmin, String xmax, String ymin, String ymax, String annotationsFilePath) {
+        try {
+            File inputFile = new File(annotationsFilePath);
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Document doc = docBuilder.parse(inputFile);
+            Node rootElement = doc.getFirstChild();
+
+            // object
+            Element objectElement = doc.createElement("object");
+            Element nameElement = doc.createElement("name");
+            nameElement.appendChild(doc.createTextNode(classDescription));
+            Element poseElement = doc.createElement("pose");
+            poseElement.appendChild(doc.createTextNode("Unspecified"));
+            Element truncatedElement = doc.createElement("truncated");
+            truncatedElement.appendChild(doc.createTextNode("0"));
+            Element difficultElement = doc.createElement("difficult");
+            difficultElement.appendChild(doc.createTextNode("0"));
+            Element bndboxElement = doc.createElement("bndbox");
+            Element xminElement = doc.createElement("xmin");
+            xminElement.appendChild(doc.createTextNode(xmin));
+            Element yminElement = doc.createElement("ymin");
+            yminElement.appendChild(doc.createTextNode(ymin));
+            Element xmaxElement = doc.createElement("xmax");
+            xmaxElement.appendChild(doc.createTextNode(xmax));
+            Element ymaxElement = doc.createElement("ymax");
+            ymaxElement.appendChild(doc.createTextNode(ymax));
+            bndboxElement.appendChild(xminElement);
+            bndboxElement.appendChild(yminElement);
+            bndboxElement.appendChild(xmaxElement);
+            bndboxElement.appendChild(ymaxElement);
+            objectElement.appendChild(nameElement);
+            objectElement.appendChild(poseElement);
+            objectElement.appendChild(truncatedElement);
+            objectElement.appendChild(difficultElement);
+            objectElement.appendChild(bndboxElement);
+            rootElement.appendChild(objectElement);
+
+            // write the content on console
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            System.out.println("-----------Modified File-----------");
+            StreamResult consoleResult = new StreamResult(System.out);
+            transformer.transform(source, consoleResult);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
