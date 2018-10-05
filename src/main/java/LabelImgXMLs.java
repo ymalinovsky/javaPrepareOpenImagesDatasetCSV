@@ -23,7 +23,6 @@ public class LabelImgXMLs {
     }
 
     void prepareLabelImgXMLs(List<Map<String, String>> labelXMLsData) {
-
         for (Map<String, String> labelXMLData : labelXMLsData) {
             String filename = FilenameUtils.getBaseName(labelXMLData.get("filename"));
             String width = labelXMLData.get("width");

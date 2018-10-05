@@ -23,27 +23,39 @@ public class Main {
 
 //        main.getTuricreateCSV(imageListWithHand);
 //        main.getTensorflowCSV(imageListWithHand);
-        main.getLabelImgXMLs(imageListWithHand);
+//        main.getLabelImgXMLs(imageListWithHand);
+        main.getTrainvalTXT(imageListWithHand);
 
 //        main.resizeImages();
+    }
 
+    private void getTrainvalTXT(List<String> imageListWithHand) throws IOException {
+        TrainvalTXT trainvalTXT = new TrainvalTXT(this);
+
+        List<Map<String, String>> existingHandImages = getExistingHandImages(imageListWithHand);
+        List<Map<String, String>> existingHandImagesData = getExistingHandImagesData(existingHandImages);
+
+        trainvalTXT.prepareTrainvalTXT(existingHandImagesData);
     }
 
     private void getLabelImgXMLs(List<String> imageListWithHand) throws IOException {
         LabelImgXMLs labelImgXMLs = new LabelImgXMLs(this);
 
-        List<Map<String, String>> labelImgXMLsData = getExistingHandImages(imageListWithHand);
-        List<Map<String, String>> labelXMLsData = getExistingHandImagesData(labelImgXMLsData);
+        List<Map<String, String>> existingHandImages = getExistingHandImages(imageListWithHand);
+        List<Map<String, String>> existingHandImagesData = getExistingHandImagesData(existingHandImages);
 
-        labelImgXMLs.prepareLabelImgXMLs(labelXMLsData);
+        labelImgXMLs.prepareLabelImgXMLs(existingHandImagesData);
+
+        System.out.println("DONE!");
     }
 
     private void getTensorflowCSV(List<String> imageListWithHand) throws IOException {
         TensorflowCSV tensorflowCSV = new TensorflowCSV(this);
 
-        List<Map<String, String>> tensorflowImagesData = getExistingHandImages(imageListWithHand);
-        List<Map<String, String>> tensorflowData = getExistingHandImagesData(tensorflowImagesData);
-        tensorflowCSV.saveTensorflowDataToCsvFile(tensorflowData);
+        List<Map<String, String>> existingHandImages = getExistingHandImages(imageListWithHand);
+        List<Map<String, String>> existingHandImagesData = getExistingHandImagesData(existingHandImages);
+
+        tensorflowCSV.saveTensorflowDataToCsvFile(existingHandImagesData);
 
         System.out.println("DONE!");
     }
