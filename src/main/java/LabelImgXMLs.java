@@ -24,7 +24,7 @@ public class LabelImgXMLs {
 
     void prepareLabelImgXMLs(List<Map<String, String>> labelXMLsData) {
         for (Map<String, String> labelXMLData : labelXMLsData) {
-            String filename = FilenameUtils.getBaseName(labelXMLData.get("filename"));
+            String filename = labelXMLData.get("filename");
             String width = labelXMLData.get("width");
             String height = labelXMLData.get("height");
             String classDescription = labelXMLData.get("class");
@@ -34,7 +34,7 @@ public class LabelImgXMLs {
             String ymax = labelXMLData.get("ymax");
 
             if (filename != null && width != null && height != null && classDescription != null && xmin != null && xmax != null && ymin != null && ymax != null) {
-                String annotationsFilePath = main.PATH_TO_CSV_FILES_FOLDER + "annotations/xmls/" + filename + ".xml";
+                String annotationsFilePath = main.PATH_TO_CSV_FILES_FOLDER + "annotations/xmls/" + FilenameUtils.getBaseName(filename) + ".xml";
                 File file = new File(annotationsFilePath);
 
                 if (!file.exists() && !file.isDirectory()) {

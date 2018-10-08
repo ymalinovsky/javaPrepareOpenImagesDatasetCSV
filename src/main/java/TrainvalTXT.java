@@ -25,7 +25,7 @@ public class TrainvalTXT {
             String filename = FilenameUtils.getBaseName(trainvalTXT.get("filename"));
 
             if (!filenames.contains(filename)) {
-                writer.println(filename + " 1 1 1");
+                writer.println(filename + " 1");
                 filenames.add(filename);
             }
 

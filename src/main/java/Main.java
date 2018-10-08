@@ -24,8 +24,9 @@ public class Main {
 //        main.getTuricreateCSV(imageListWithHand);
 //        main.getTensorflowCSV(imageListWithHand);
 //        main.getLabelImgXMLs(imageListWithHand);
-        main.getTrainvalTXT(imageListWithHand);
+//        main.getTrainvalTXT(imageListWithHand);
 
+        
 //        main.resizeImages();
     }
 
