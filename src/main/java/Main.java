@@ -36,6 +36,8 @@ public class Main {
         List<Map<String, String>> existingHandImagesData = getExistingHandImagesData(existingHandImages);
 
         trainvalTXT.prepareTrainvalTXT(existingHandImagesData);
+
+        System.out.println("DONE!");
     }
 
     private void getLabelImgXMLs(List<String> imageListWithHand) throws IOException {
@@ -116,9 +118,9 @@ public class Main {
             }
 
             // tmp test logic
-            if (imagesData.size() == 1) {
-                break;
-            }
+//            if (imagesData.size() == 1) {
+//                break;
+//            }
         }
 
 

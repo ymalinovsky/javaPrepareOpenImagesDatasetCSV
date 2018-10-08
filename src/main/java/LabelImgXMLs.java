@@ -34,7 +34,7 @@ public class LabelImgXMLs {
             String ymax = labelXMLData.get("ymax");
 
             if (filename != null && width != null && height != null && classDescription != null && xmin != null && xmax != null && ymin != null && ymax != null) {
-                String annotationsFilePath = main.PATH_TO_CSV_FILES_FOLDER + "annotations/" + filename + ".xml";
+                String annotationsFilePath = main.PATH_TO_CSV_FILES_FOLDER + "annotations/xmls/" + filename + ".xml";
                 File file = new File(annotationsFilePath);
 
                 if (!file.exists() && !file.isDirectory()) {
